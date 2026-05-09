@@ -41,14 +41,19 @@ const Topbar: React.FC = () => {
           <div className="ml-2 hidden sm:flex items-center gap-2 pl-3 border-l border-slate-200 dark:border-white/5">
             <div className="text-right hidden md:block">
               <p className="text-xs font-medium text-slate-900 dark:text-white leading-tight">
-                {profile.firstName} {profile.lastName}
+                {(profile.firstName || profile.lastName)
+                  ? `${profile.firstName} ${profile.lastName}`.trim()
+                  : (user?.email ?? '—')}
               </p>
               <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-tight">
-                {user?.email ?? profile.companyName}
+                {user?.email ?? profile.companyName ?? '—'}
               </p>
             </div>
             <div className="flex size-8 items-center justify-center rounded-full bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 text-xs font-semibold">
-              {`${profile.firstName.charAt(0)}${profile.lastName.charAt(0)}`.toUpperCase()}
+              {(() => {
+                const initials = `${profile.firstName.charAt(0)}${profile.lastName.charAt(0)}`.toUpperCase();
+                return initials || (user?.email.charAt(0).toUpperCase() ?? '·');
+              })()}
             </div>
           </div>
         )}

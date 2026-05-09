@@ -30,7 +30,8 @@ const Register: React.FC = () => {
       setError('Indicá la razón social de tu empresa');
       return;
     }
-    if (!email.includes('@')) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim())) {
       setError('Ingresá un email válido');
       return;
     }

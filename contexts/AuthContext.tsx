@@ -10,6 +10,7 @@ import {
   signOut as authSignOut,
   subscribe,
   updateProfile as authUpdateProfile,
+  mapProfile,
 } from '../lib/auth';
 import { supabase } from '../lib/supabase';
 import type { PlanName } from '../lib/plans';
@@ -68,20 +69,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const refresh = useCallback(async () => {
-    const { data } = await supabase.auth.getSession();
-    if (!data.session?.user) {
+    const { data: sessionData } = await supabase.auth.getSession();
+    const supaUser = sessionData.session?.user;
+    if (!supaUser) {
       setSession(null);
       return;
     }
-    const { data: profileRow } = await supabase
+    const { data: profileRow, error } = await supabase
       .from('profiles')
       .select('*')
-      .eq('id', data.session.user.id)
+      .eq('id', supaUser.id)
       .maybeSingle();
+    if (error) {
+      // eslint-disable-next-line no-console
+      console.error('[auth] refresh: error leyendo profile:', error.message);
+      return;
+    }
     if (profileRow) {
-      // Re-mapeo manual para evitar duplicar mapProfile (lib/auth.ts no lo exporta).
-      // Forzamos un onAuthStateChange usando refreshSession, que sí dispara subscribe.
-      await supabase.auth.refreshSession();
+      setSession({
+        user: {
+          id: supaUser.id,
+          email: supaUser.email ?? '',
+          createdAt: supaUser.created_at,
+        },
+        profile: mapProfile(profileRow),
+      });
     }
   }, []);
 

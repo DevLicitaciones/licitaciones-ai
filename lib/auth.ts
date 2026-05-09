@@ -57,7 +57,7 @@ function normalizePlan(raw: string | null | undefined): PlanName {
   return 'Básico';
 }
 
-function mapProfile(row: ProfileRow): Profile {
+export function mapProfile(row: ProfileRow): Profile {
   return {
     userId: row.id,
     firstName: row.first_name ?? '',
@@ -172,26 +172,46 @@ type Listener = (session: Session | null) => void;
  */
 export function subscribe(listener: Listener): () => void {
   let cancelled = false;
+  // Cache del profile por userId para evitar refetchear en cada TOKEN_REFRESHED.
+  // El profile real solo cambia con SIGNED_IN, USER_UPDATED o cuando llamamos
+  // refresh() manualmente. Token refresh no requiere re-leer la DB.
+  let lastFetchedUserId: string | null = null;
+  let lastFetchedProfile: ProfileRow | null = null;
 
-  // Estrategia: disparamos al listener INMEDIATAMENTE con una sesión mínima
-  // (solo user, sin profile) en cuanto sabemos que hay auth, y refire con la
-  // sesión completa cuando llega el profile. Esto evita que ProtectedRoute se
-  // quede colgado si la query a `profiles` tarda.
-  const fireFor = async (supaSession: SupabaseSession | null) => {
+  const fireFor = async (event: string, supaSession: SupabaseSession | null) => {
     if (cancelled) return;
     if (!supaSession?.user) {
+      lastFetchedUserId = null;
+      lastFetchedProfile = null;
       listener(null);
       return;
     }
-    // 1) Sesión mínima inmediata — desbloquea el spinner.
+
+    // Si el user no cambió y ya tenemos profile, reusamos sin volver a la DB.
+    if (
+      supaSession.user.id === lastFetchedUserId &&
+      lastFetchedProfile &&
+      event === 'TOKEN_REFRESHED'
+    ) {
+      listener({
+        user: mapUser(supaSession.user),
+        profile: mapProfile(lastFetchedProfile),
+      });
+      return;
+    }
+
+    // 1) Sesión mínima inmediata — desbloquea el spinner / ProtectedRoute.
     listener({
       user: mapUser(supaSession.user),
       profile: buildMinimalProfile(supaSession),
     });
-    // 2) Profile real (con timeout interno).
+
+    // 2) Profile real (con timeout interno y reuso de cache cuando posible).
     const profileRow = await fetchProfile(supaSession.user.id);
     if (cancelled) return;
     if (profileRow) {
+      lastFetchedUserId = supaSession.user.id;
+      lastFetchedProfile = profileRow;
       listener({
         user: mapUser(supaSession.user),
         profile: mapProfile(profileRow),
@@ -199,14 +219,14 @@ export function subscribe(listener: Listener): () => void {
     }
   };
 
-  // Disparo inicial
+  // Disparo inicial — usamos un evento sintético para diferenciar del flujo real.
   supabase.auth.getSession().then(({ data }) => {
-    fireFor(data.session);
+    fireFor('INITIAL', data.session);
   });
 
   // Suscripción a cambios
-  const { data: sub } = supabase.auth.onAuthStateChange((_event, supaSession) => {
-    fireFor(supaSession);
+  const { data: sub } = supabase.auth.onAuthStateChange((event, supaSession) => {
+    fireFor(event, supaSession);
   });
 
   return () => {

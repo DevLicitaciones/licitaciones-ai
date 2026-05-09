@@ -56,7 +56,9 @@ export const supabase = createClient(
     auth: {
       persistSession: true,
       autoRefreshToken: true,
-      detectSessionInUrl: true,
+      // Lo desactivamos: usamos email/password (no OAuth ni magic links).
+      // Activarlo con HashRouter puede generar parsing erróneo del hash.
+      detectSessionInUrl: false,
       storage: typeof window !== 'undefined' ? window.localStorage : undefined,
     },
   }

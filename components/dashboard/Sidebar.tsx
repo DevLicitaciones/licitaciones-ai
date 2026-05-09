@@ -47,9 +47,13 @@ const Sidebar: React.FC = () => {
     navigate('/');
   };
 
-  const initials = profile
-    ? `${profile.firstName.charAt(0)}${profile.lastName.charAt(0)}`.toUpperCase()
-    : '··';
+  const initials = (() => {
+    if (!profile) return '··';
+    const combined = `${profile.firstName.charAt(0)}${profile.lastName.charAt(0)}`.toUpperCase();
+    if (combined) return combined;
+    const userInitial = profile.email.charAt(0).toUpperCase();
+    return userInitial || '··';
+  })();
 
   return (
     <aside className="hidden lg:flex flex-col w-60 shrink-0 border-r border-slate-200 dark:border-white/5 bg-white dark:bg-navy-950 h-screen sticky top-0">
