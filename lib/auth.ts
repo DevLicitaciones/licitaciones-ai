@@ -78,45 +78,73 @@ function mapProfile(row: ProfileRow): Profile {
 }
 
 // ---- Carga de profile + ensamblado de sesión ----
+const PROFILE_FETCH_TIMEOUT_MS = 5000;
+
 async function fetchProfile(userId: string): Promise<ProfileRow | null> {
-  const { data, error } = await supabase
+  // Timeout defensivo: si la red está caída, RLS bloquea o Supabase no responde,
+  // no queremos que el panel se cuelgue en un spinner infinito.
+  const fetchPromise = supabase
     .from('profiles')
     .select('*')
     .eq('id', userId)
-    .maybeSingle();
-  if (error) {
+    .maybeSingle()
+    .then(({ data, error }) => {
+      if (error) {
+        // eslint-disable-next-line no-console
+        console.error('[auth] Error cargando profile:', error.message);
+        return null;
+      }
+      return data;
+    });
+
+  const timeoutPromise = new Promise<null>((resolve) =>
+    setTimeout(() => {
+      // eslint-disable-next-line no-console
+      console.warn(
+        `[auth] Timeout (${PROFILE_FETCH_TIMEOUT_MS}ms) cargando profile. ` +
+          'Renderizando con datos mínimos. Verificá conectividad y env vars.'
+      );
+      resolve(null);
+    }, PROFILE_FETCH_TIMEOUT_MS)
+  );
+
+  try {
+    return await Promise.race([fetchPromise, timeoutPromise]);
+  } catch (e) {
     // eslint-disable-next-line no-console
-    console.error('[auth] Error cargando profile:', error.message);
+    console.error('[auth] Excepción cargando profile:', e);
     return null;
   }
-  return data;
+}
+
+function buildMinimalProfile(supaSession: SupabaseSession): Profile {
+  return {
+    userId: supaSession.user.id,
+    firstName: '',
+    lastName: '',
+    companyName: '',
+    rut: '',
+    industry: '',
+    region: '',
+    email: supaSession.user.email ?? '',
+    phone: '',
+    fiscalAddress: '',
+    plan: 'Básico',
+    subscriptionStatus: 'trial',
+    creditsApi: 0,
+    billingCycle: 'annual',
+    createdAt: supaSession.user.created_at,
+  };
 }
 
 async function buildSession(supaSession: SupabaseSession | null): Promise<Session | null> {
   if (!supaSession?.user) return null;
   const profileRow = await fetchProfile(supaSession.user.id);
   if (!profileRow) {
-    // Usuario autenticado pero sin fila en profiles — mostramos un perfil mínimo
-    // así el panel renderiza algo razonable y el usuario puede completar sus datos.
+    // Auth ok pero sin fila en profiles (o timeout) → perfil mínimo para no colgar el panel.
     return {
       user: mapUser(supaSession.user),
-      profile: {
-        userId: supaSession.user.id,
-        firstName: '',
-        lastName: '',
-        companyName: '',
-        rut: '',
-        industry: '',
-        region: '',
-        email: supaSession.user.email ?? '',
-        phone: '',
-        fiscalAddress: '',
-        plan: 'Básico',
-        subscriptionStatus: 'trial',
-        creditsApi: 0,
-        billingCycle: 'annual',
-        createdAt: supaSession.user.created_at,
-      },
+      profile: buildMinimalProfile(supaSession),
     };
   }
   return {
@@ -145,18 +173,40 @@ type Listener = (session: Session | null) => void;
 export function subscribe(listener: Listener): () => void {
   let cancelled = false;
 
-  // Disparo inicial
-  supabase.auth.getSession().then(async ({ data }) => {
+  // Estrategia: disparamos al listener INMEDIATAMENTE con una sesión mínima
+  // (solo user, sin profile) en cuanto sabemos que hay auth, y refire con la
+  // sesión completa cuando llega el profile. Esto evita que ProtectedRoute se
+  // quede colgado si la query a `profiles` tarda.
+  const fireFor = async (supaSession: SupabaseSession | null) => {
     if (cancelled) return;
-    const session = await buildSession(data.session);
-    listener(session);
+    if (!supaSession?.user) {
+      listener(null);
+      return;
+    }
+    // 1) Sesión mínima inmediata — desbloquea el spinner.
+    listener({
+      user: mapUser(supaSession.user),
+      profile: buildMinimalProfile(supaSession),
+    });
+    // 2) Profile real (con timeout interno).
+    const profileRow = await fetchProfile(supaSession.user.id);
+    if (cancelled) return;
+    if (profileRow) {
+      listener({
+        user: mapUser(supaSession.user),
+        profile: mapProfile(profileRow),
+      });
+    }
+  };
+
+  // Disparo inicial
+  supabase.auth.getSession().then(({ data }) => {
+    fireFor(data.session);
   });
 
   // Suscripción a cambios
-  const { data: sub } = supabase.auth.onAuthStateChange(async (_event, supaSession) => {
-    if (cancelled) return;
-    const session = await buildSession(supaSession);
-    listener(session);
+  const { data: sub } = supabase.auth.onAuthStateChange((_event, supaSession) => {
+    fireFor(supaSession);
   });
 
   return () => {
