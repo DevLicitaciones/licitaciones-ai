@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import HeroVideo from '../components/HeroVideo';
+import HeroAnimation from '../components/HeroAnimation';
 import PageCTA from '../components/PageCTA';
 
 const Home: React.FC = () => {
@@ -15,7 +15,7 @@ const Home: React.FC = () => {
     <div className={`transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
       {/* HERO con video de fondo */}
       <section className="relative min-h-[92vh] flex flex-col justify-center overflow-hidden text-white">
-        <HeroVideo />
+        <HeroAnimation />
 
         <div className="relative z-10 mx-auto max-w-7xl px-6 lg:px-8 py-24">
           <div className="grid gap-16 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
