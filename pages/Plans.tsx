@@ -28,11 +28,12 @@ const Plans: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
-          {PLANS.map((plan) => (
+          {PLANS.map((plan, idx) => (
             <div
               key={plan.id}
               onClick={() => setSelected(plan.id)}
-              className={`relative flex flex-col p-8 md:p-10 rounded-[3rem] border transition-all duration-500 cursor-pointer group ${
+              style={{ animationDelay: `${idx * 0.1}s` }}
+              className={`relative flex flex-col p-8 md:p-10 rounded-[3rem] border transition-all duration-500 cursor-pointer group animate-fade-up ${
                 selected === plan.id
                 ? 'bg-navy-900 dark:bg-white text-white dark:text-navy-950 border-emerald-500 scale-105 z-10 shadow-[0_40px_80px_-20px_rgba(0,0,0,0.3)] ring-1 ring-emerald-500/50'
                 : 'bg-white dark:bg-navy-900/50 border-slate-200 dark:border-white/5 hover:border-emerald-500/30 backdrop-blur-md'
@@ -47,7 +48,7 @@ const Plans: React.FC = () => {
               <div className="mb-10">
                 <h3 className="text-xl font-bold mb-6">Plan {plan.name}</h3>
                 <div className="flex items-baseline gap-2">
-                  <span className="text-5xl font-black">{billingCycle === 'monthly' ? plan.monthly : plan.annual}</span>
+                  <span className="text-5xl font-black tabular-nums transition-all duration-300">{billingCycle === 'monthly' ? plan.monthly : plan.annual}</span>
                   <span className={`text-sm font-bold opacity-60`}>/mes</span>
                 </div>
                 <p className={`text-xs mt-4 font-medium opacity-70 leading-relaxed`}>{plan.desc}</p>

@@ -1,46 +1,47 @@
 
 import React from 'react';
+import PageCTA from '../components/PageCTA';
 
 const HowItWorks: React.FC = () => {
   const steps = [
     {
       id: "01",
-      title: "Extracción Masiva",
-      desc: "Nuestros bots rastrean Mercado Público 24/7. Extraemos no solo el resumen, sino las bases administrativas, técnicas y resoluciones adjuntas.",
+      title: "Extracción continua",
+      desc: "Sincronizamos Mercado Público en tiempo real. Capturamos no solo el resumen, también las bases administrativas, técnicas y resoluciones adjuntas.",
       icon: "dataset",
-      tag: "Big Data"
+      tag: "Datos"
     },
     {
       id: "02",
-      title: "Categorización Inteligente",
-      desc: "Nuestra IA 'lee' las bases y clasifica la licitación en categorías hiper-específicas, descartando el ruido y enfocándose en lo que realmente haces.",
+      title: "Categorización con IA",
+      desc: "Modelos de lenguaje leen las bases y clasifican cada licitación en categorías específicas. Filtran el ruido y te muestran solo lo relevante para tu rubro.",
       icon: "segment",
       tag: "NLP"
     },
     {
       id: "03",
-      title: "Predicción de Precios",
-      desc: "El modelo Gausix analiza los últimos 3 años de adjudicaciones similares, la competencia activa y el presupuesto fiscal para darte el 'Precio de Oro'.",
+      title: "Predicción de precios",
+      desc: "El estimador Gausix analiza adjudicaciones similares de los últimos años, la competencia activa y el presupuesto fiscal para sugerirte un precio óptimo.",
       icon: "trending_up",
-      tag: "Gausix Engine"
+      tag: "Estimador Gausix"
     },
     {
       id: "04",
-      title: "Gestión de Postulación",
-      desc: "Preparamos un checklist inteligente para que no olvides ningún documento. Monitorea el estado de tu oferta en tiempo real hasta la adjudicación.",
+      title: "Gestión de postulación",
+      desc: "Checklist automático para que no se te escape ningún documento. Seguís el estado de tu oferta hasta la adjudicación, con alertas en cada cambio.",
       icon: "task_alt",
-      tag: "Workflow"
+      tag: "Seguimiento"
     }
   ];
 
   return (
     <div className="py-24 dot-grid-bg min-h-screen relative overflow-hidden">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        <div className="text-center mb-24">
-          <h2 className="text-emerald-500 font-bold tracking-widest uppercase text-xs mb-4">Metodología de Éxito</h2>
-          <h1 className="text-5xl md:text-7xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-8">De los Datos a <br /><span className="text-emerald-500">la Adjudicación.</span></h1>
+        <div className="text-center mb-24 animate-fade-up">
+          <h2 className="text-emerald-500 font-bold tracking-widest uppercase text-xs mb-4">Cómo funciona</h2>
+          <h1 className="text-5xl md:text-6xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-8 leading-[1.05]">De los datos a <br /><span className="text-emerald-500">la adjudicación.</span></h1>
           <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed">
-            Eliminamos la incertidumbre del proceso de compra pública mediante un flujo de trabajo analítico de grado militar.
+            Un pipeline automatizado de extracción y análisis. Convertimos los miles de documentos de Mercado Público en oportunidades concretas para tu empresa.
           </p>
         </div>
 
@@ -77,16 +78,13 @@ const HowItWorks: React.FC = () => {
           ))}
         </div>
 
-        {/* Final CTA section */}
-        <div className="mt-40 rounded-[3.5rem] bg-gradient-to-br from-emerald-500 to-cyan-600 p-12 md:p-20 text-center text-white shadow-2xl relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none grid-pattern"></div>
-          <h2 className="text-4xl md:text-5xl font-extrabold mb-8 relative z-10">¿Listo para ganar tu próxima licitación?</h2>
-          <p className="text-xl text-white/80 max-w-2xl mx-auto mb-12 relative z-10">Crea una cuenta gratuita y descubre las oportunidades que tu competencia no está viendo.</p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center relative z-10">
-             <button className="h-16 px-10 rounded-full bg-white text-navy-950 font-black text-lg shadow-xl hover:scale-105 transition-all active:scale-95">Comenzar Gratis</button>
-             <button className="h-16 px-10 rounded-full bg-navy-950 text-white font-black text-lg shadow-xl hover:bg-navy-900 transition-all active:scale-95">Ver Video Demo</button>
-          </div>
-        </div>
+        {/* Final CTA — usa PageCTA estandarizado */}
+        <PageCTA
+          title="¿Listo para ganar tu próxima licitación?"
+          subtitle="Creá una cuenta gratis y descubrí las oportunidades que tu competencia no está viendo."
+          primary={{ label: 'Comenzar gratis', href: '/register' }}
+          secondary={{ label: 'Ver planes', href: '/planes' }}
+        />
       </div>
     </div>
   );
