@@ -1,0 +1,102 @@
+
+<!DOCTYPE html>
+<html class="dark" lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Licitaciones.ai - Domina Mercado Público con IA</title>
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#10B981',
+                        emerald: {
+                            400: '#34d399',
+                            500: '#10B981',
+                            600: '#059669',
+                        },
+                        navy: {
+                            950: '#020617',
+                            900: '#0A192F',
+                            800: '#112240',
+                            700: '#233554',
+                            600: '#334E68',
+                        },
+                    },
+                    fontFamily: {
+                        "sans": ["Plus Jakarta Sans", "Inter", "sans-serif"],
+                    },
+                    animation: {
+                        'fade-up': 'fade-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                        'spin-slow': 'spin 15s linear infinite',
+                        'spin-reverse': 'spin-reverse 20s linear infinite',
+                        'bounce-slow': 'bounce 3s infinite',
+                    },
+                    keyframes: {
+                        'fade-up': {
+                            'from': { opacity: '0', transform: 'translateY(20px)' },
+                            'to': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        'spin-reverse': {
+                            'from': { transform: 'rotate(360deg)' },
+                            'to': { transform: 'rotate(0deg)' },
+                        }
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            scroll-behavior: smooth;
+        }
+        .grid-pattern {
+            background-size: 40px 40px;
+            background-image: radial-gradient(circle, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+        }
+        .light .grid-pattern {
+            background-image: radial-gradient(circle, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
+        }
+        .dot-grid-bg {
+            background-size: 20px 20px;
+            background-image: radial-gradient(circle, rgba(148, 163, 184, 0.1) 1px, transparent 1px);
+        }
+        .dark .dot-grid-bg {
+            background-image: radial-gradient(circle, rgba(148, 163, 184, 0.05) 1px, transparent 1px);
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .light .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+    </style>
+<script type="importmap">
+{
+  "imports": {
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "react-router-dom": "https://esm.sh/react-router-dom@^7.11.0",
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "react": "https://esm.sh/react@^19.2.3"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+<body class="bg-white text-slate-900 dark:bg-navy-950 dark:text-white antialiased">
+    <div id="root"></div>
+<script type="module" src="/index.tsx"></script>
+</body>
+</html>
